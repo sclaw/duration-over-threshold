@@ -168,6 +168,7 @@ def generate_batch(state, out_path, min_record_length=None, water_new_year=None)
         water_new_year (str): Date of water NY.  Typically '10-01'
         specific date. Defaults to None.
     """
+    print(f'Generating batch for {state}')
     # Download metadata
     service = SiteService()
     record_lengths = service.query_record_lengths('iv', state=state)
@@ -210,11 +211,13 @@ def batch_download(output_dir, site_service_path):
         out_df.to_sql('miscellaneous', connection, index=False, 
                       if_exists='replace')
         
+        print('Downloading dv data')
         out_df = iv_access.query_record(station, begin_date, end_date, 
                                         service_type='dv', save_path=None)
         out_df.to_sql('mean_dv_timeseries', connection, index=False, 
                       if_exists='replace')
 
+        print('Downloading iv data')
         out_df = iv_access.query_record(station, begin_date, end_date, 
                                         service_type='iv', save_path=None)
         out_df.to_sql('raw_timeseries', connection, index=False, 
