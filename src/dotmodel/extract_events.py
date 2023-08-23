@@ -169,20 +169,39 @@ def scott_thresholds(series, threshold_count):
     return  np.linspace(start_pt, end_pt, num=threshold_count)
 
 def events_from_arrival_rate(series, record_length, arrival_rate, t_int, min_recession_pct):
+    """Generate events from a threshold with set arrival rate.
+
+    Args:
+        series (pandas df): flowrate timeseries
+        record_length (float): length of flowrate record in years.
+        arrival_rate (float): desired number of events per year
+        t_int (float): min interevent duration required to prevent merging
+        min_recession_pct (float): min recession percent required to prevent merging
+
+    Returns:
+        pandas df with flood events from threshold with desired exceedence
+        frequency, pandas df with events from all thresholds analyzed.
+    """
+    # Ensure types correct
+    series = series.astype({'datetime': 'datetime64[ns]', 'flowrate': 'float32'})
+
     # make an initial grid for guessing
+    print('Preliminary threshold screening')
     min = series['flowrate'].where(series['flowrate'] > 0).min() * 1.1
     max = series['flowrate'].max()
     guess_1 =  np.linspace(min, max, 10)
-    print('guess 1 extraction')
+    
     events_1 = [extract_from_threshold(t, series) for t in guess_1]
     events_1 = pd.concat(events_1)
-    print('guess 1 cleaning')
+
     clean_events_1 = clean_events(events_1, t_interevent=t_int, min_recession_pct=min_recession_pct)
     clean_events_1_tmp = clean_events_1.query('type == 1')
     rates = clean_events_1_tmp['threshold'].value_counts(sort=False) / record_length
     closest_arrival_rate = abs(rates - arrival_rate).argmin()
-    print(f'threshold {rates.index[closest_arrival_rate]} closest with arrival rate {rates.iloc[closest_arrival_rate]} events per year')
+    print(f'threshold {round(rates.index[closest_arrival_rate], 1)} closest with arrival rate {rates.iloc[closest_arrival_rate]} events per year')
 
+    # refine grid and re-search
+    print('Refined grid threshold screening')
     if closest_arrival_rate == 0:
         guess_2 = np.linspace(rates.index[0], rates.index[1], 10)
     else:
@@ -194,7 +213,7 @@ def events_from_arrival_rate(series, record_length, arrival_rate, t_int, min_rec
     rates_2 = clean_events_2_tmp['threshold'].value_counts(sort=False) / record_length
     closest_arrival_rate = abs(rates_2 - arrival_rate).argmin()
     final_threshold = rates_2.index[closest_arrival_rate]
-    print(f'threshold {rates_2.index[closest_arrival_rate]} closest with arrival rate {rates_2.iloc[closest_arrival_rate]} events per year')
+    print(f'threshold {round(rates_2.index[closest_arrival_rate], 1)} closest with arrival rate {rates_2.iloc[closest_arrival_rate]} events per year')
     
     all_events = pd.concat([clean_events_1, clean_events_2])
     marginal_events = all_events.query(f'threshold == {final_threshold}')
