@@ -1,0 +1,28 @@
+# pyproject.toml
+
+[build-system]
+requires      = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dotmodel"
+version = "0.0.1"
+description = "A hierarchical statistical model for the frequency, duration, and magnitude of river floods."
+readme = "README.md"
+authors = [{ name = "Scott Lawson", email = "scott.lawson@uvm.edu" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["FFA", "flood frequency", "flood", "floods", "rivers", "river", "duration", "statistical model", "Duration-Over-Threshold", "peaks over threshold", "POT", "DOT", "flood magnitude", "water resources"]
+dependencies = [
+    "numpy",
+    "pandas",
+    "matplotlib"
+]
+requires-python = ">=3.9"
+
+[project.urls]
+Homepage = "https://github.com/sclaw/NA"
