@@ -261,13 +261,12 @@ def trim_record_to_water_new_year(site_data, water_new_year):
     return site_data
 
 
-def download_gage_date(site_no, save_path, water_new_year=None):
+def download_gage_date(site_no, water_new_year=None, begin_date=None, end_date=None):
     """Download metadata and flowrate data for a single USGS gage.
 
     Args:
         site_no (str): USGS site number.
         water_new_year (str): Date of water NY.  Typically '10-01'
-        save_path (str): Output .db path.
     """
     # Query metadata
     print(f'Loading station metadata for {site_no}')
@@ -278,27 +277,25 @@ def download_gage_date(site_no, save_path, water_new_year=None):
     combo = record_lengths.merge(site_data, on='site_no')
     if water_new_year:
         combo = trim_record_to_water_new_year(combo, water_new_year)
-    begin_date = combo.iloc[0]['begin_date']
-    end_date = combo.iloc[0]['end_date']
+    if not begin_date:
+        begin_date = combo.iloc[0]['begin_date']
+    if not end_date:
+        end_date = combo.iloc[0]['end_date']
     
     # Download data
     iv_access = ValueService()
-    connection = sqlite3.connect(save_path)
 
-    out_df = combo.iloc[0][['site_no', 'station_nm', 'begin_date', 'end_date', 
-                            'count_nu', 'dec_lat_va', 'dec_long_va', 
-                            'drain_area_va']].to_frame().T
-    out_df.to_sql('miscellaneous', connection, index=False, 
-                  if_exists='replace')
+    misc = combo.iloc[0][['site_no', 'station_nm', 'begin_date', 'end_date', 
+                          'count_nu', 'dec_lat_va', 'dec_long_va', 
+                          'drain_area_va']].to_frame().T
     
     print('Downloading dv data')
-    out_df = iv_access.query_record(site_no, begin_date, end_date, 
-                                    service_type='dv', save_path=None)
-    out_df.to_sql('mean_dv_timeseries', connection, index=False, 
-                  if_exists='replace')
-
+    dv_data = iv_access.query_record(site_no, begin_date, end_date, 
+                                     service_type='dv', save_path=None)
+    
     print('Downloading iv data')
-    out_df = iv_access.query_record(site_no, begin_date, end_date, 
-                                    service_type='iv', save_path=None)
-    out_df.to_sql('raw_timeseries', connection, index=False, 
-                  if_exists='replace')
+    iv_data = iv_access.query_record(site_no, begin_date, end_date, 
+                                     service_type='iv', save_path=None)
+    
+    return misc, dv_data, iv_data
+    
