@@ -169,7 +169,7 @@ def scott_thresholds(series, threshold_count):
     return  np.linspace(start_pt, end_pt, num=threshold_count)
 
 def events_from_arrival_rate(series, record_length, arrival_rate, t_int, min_recession_pct):
-    """Generate events from a threshold with set arrival rate.
+    """Generate cleaned events from a threshold with set arrival rate.
 
     Args:
         series (pandas df): flowrate timeseries
