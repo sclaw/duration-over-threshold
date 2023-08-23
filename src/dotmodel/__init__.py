@@ -1,1 +1,1 @@
-from usgs_gage import Gage
+from dotmodel.usgs_gage import Gage
