@@ -1,67 +1,68 @@
-# Muskingum-Cunge Routing in Python
+![](images/logo_1.png#gh-light-mode-only "Duration-Over-Threshold")
+![](images/logo_1_dm.png#gh-dark-mode-only "Duration-Over-Threshold")
+
+
+# The Duration-Over-Threshold Model
 
 ## Overview
-`muskingumcunge` is a Python implementation of the Musking-Cunge model, a channel routing method that allows for the 
-estimation of a hydrograph's lag and attenuation as it propogates downstream through a river network.  In this formulation, 
-the Muskingum-Cunge method uses cross-sectional geometry and a Manning's flow assumption to derive parameters of the 
-Muskingum method (K and X) at each timestep.
+`dotmodel` is the python library for applying the Duration-Over-Threshold model (Lawson et al., 2024).  The 
+Duration-Over-Threshold model is a hierarchical statistical model that characterizes the return period of a given 
+flowrate being exceeded for a given duration.  The current functionality of this library includes:
 
-The example below shows how to use `muskingumcunge` to route a simple hydrograph through a trapezoidal channel.
+* Querying site and flowrate data from USGS National Water Information Service (NWIS) REST API.
+* Cleaning flowrate records.
+* Extracting and attributing flood events from a flowrate record.
+* Estimating parameters of the Duration-Over-Threshold model from flood event series.
+* Plotting of the Duration-Over-Model fit.
+* Calculating relationships between flowrate, duration, and recurrence interval.
+
+For a detailed explanation of this model, please see the open-access article from Lawson et al. (2024).
+
+## Example
+
+The example below downloads relevant data for USGS gage 01638500 (Potomac River at Point of Rocks, MD), cleans the 
+timeseries, and estimates the Duration-Over-Threshold model parameters.
 
 ```python
-import numpy as np
-import matplotlib.pyplot as plt
-from muskingumcunge.reach import TrapezoidalReach
-from muskingumcunge.timeseriestools import parabolic_hydrograph_generator
+from dotmodel import Gage
 
-# Generate hydrograph
-start = 0  # hours
-stop = 24  # hours
-dt = 0.1  # hours
-timestamps = np.arange(start, stop, dt)
-peak = 1000
-duration = 10
-inflows = parabolic_hydrograph_generator(timestamps, peak, duration)
-
-# Build reach
-reach = TrapezoidalReach(100, 100, 0.1, 0.001, 2000)
-
-# Route flows
-outflows = reach.route_hydrograph(inflows, 0.1)
-
-# Plot results
-fig, ax = plt.subplots()
-ax.plot(timestamps, inflows, label='inflow')
-ax.plot(timestamps, outflows, label='outflow')
-ax.set_xlabel('Time(hrs)')
-ax.set_ylabel('Flowrate(cms)')
-plt.legend()
-plt.tight_layout()
-plt.show()
+db_path = r'01638500.db'
+potomac = Gage(db_path)
+potomac.download_nwis('01638500', '10-01')
+potomac.clean_timeseries()
+potomac.flow_frequency_analysis(truncation_arrival_rate=2)
+potomac.duration_analysis()
 ```
 
-![](images/simple_routing.png "Simple Routing Example")
+The model fit may then be plotted.
 
-Current functonality of this package includes
-- Calculation of channel geometry (top width, area, wetted perimeter, and hydraulic radius) as a function of stage
-- Derivation of stage-discharge rating curve and Muskingum Parameters
-- Simple synthetic unit hydrograph generation
-- Muskingum-Cunge routing
 
-Hopefully more reatures to come!!
+```python
+potomac.plot_flow_frequency('01638500_ffa.png')
+```
+![](images/01638500_ffa.png "Potomac flow frequency")
+```python
+potomac.plot_duration_power_law('01638500_duration.png')
+```
+![](images/01638500_duration.png "Potomac duration dynamics")
+```python
+potomac.plot_model_summary('01638500.png')
+```
+![](images/01638500.png "Potomac Duration-Over-Threshold Summary")
+
 
 ## Installation
 
 `muskingumcunge` can be installed using pip:
 	
-    $ python3 -m pip install muskingumcunge
+    $ python3 -m pip install dotmodel
 
 or conda:
 
-    $ conda install -c conda-forge muskingumcunge
+    $ conda install -c conda-forge dotmodel
 
 ## Issue tracker
 
 Any bugs, suggestions, or questions may be logged using the issues tab
 
-https://github.com/sclaw/muskingum-cunge/issues
+https://github.com/sclaw/duration-over-threshold/issues
