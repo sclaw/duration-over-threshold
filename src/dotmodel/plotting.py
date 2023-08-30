@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 import matplotlib.ticker as mticker
 from matplotlib.lines import Line2D
+import matplotlib.dates as mdates
 import numpy as np
 
 
@@ -138,3 +139,22 @@ def plot_model_contour(a, b, xi, alpha, k, resolution=3000, plot_live=False, sav
 
     plt.close(fig)
 
+def plot_timeseries(data, misc_data, save_path):
+    fig, ax = plt.subplots(figsize=(35, 6))
+
+    ax.grid(axis='x')
+    ax.set_xlabel('Time')
+    ax.xaxis.set_major_locator(mdates.YearLocator(base=1, month=1, day=1))
+    ax.set_ylabel('Flowrate (cfs)')
+
+    ax.plot(data['datetime'], data['flowrate'], lw=0.5, c='k', zorder=2, label='instantaneous flowrate')
+
+    site_no = misc_data['site_no'].item()
+    name = misc_data['station_nm'].item()
+    da = round(float(misc_data['drain_area_va'].item()), 1)
+
+    ax.set_title(f'{site_no} | {name} | {da} sqmi', loc='left')
+    ax.legend(markerscale=10)
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300)
+    plt.close(fig)

@@ -90,3 +90,10 @@ class Gage:
         misc_data = pd.read_sql_query('SELECT * FROM miscellaneous', self.connection)
 
         plotting.plot_conditional_fit(events, misc_data, save_path)
+
+    def plot_timeseries(self, series, save_path):
+        ts = pd.read_sql_query(f'SELECT * FROM {series}', self.connection)
+        ts = ts.astype({'datetime': 'datetime64[ns]', 'flowrate': 'float32'})
+        misc_data = pd.read_sql_query('SELECT * FROM miscellaneous', self.connection)
+
+        plotting.plot_timeseries(ts, misc_data, save_path)
