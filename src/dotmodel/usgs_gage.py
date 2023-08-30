@@ -100,6 +100,7 @@ class Gage:
 
     def plot_exponential_durations(self, save_path):
         clean_events = pd.read_sql_query('SELECT * FROM clean_events', self.connection)
+        clean_events = clean_events.query(f'type == 1')
         misc_data = pd.read_sql_query('SELECT * FROM miscellaneous', self.connection)
 
         plotting.exponential_check(clean_events, misc_data, save_path)
