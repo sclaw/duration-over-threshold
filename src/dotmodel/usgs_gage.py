@@ -11,7 +11,6 @@ class Gage:
         self.connection = sqlite3.connect(self.path)
 
     def download_nwis(self, site_no: str, water_new_year: str=None, begin_date: str=None, end_date: str=None):
-        self.site_no = site_no
         misc, dv, iv = nwis.download_gage_date(site_no, water_new_year, begin_date, end_date)
         misc.to_sql('miscellaneous', self.connection, index=False, if_exists='replace')
         dv.to_sql('mean_dv_timeseries', self.connection, index=False, if_exists='replace')
@@ -72,6 +71,7 @@ class Gage:
         alpha = misc_data['alpha'].item()
         k = misc_data['k'].item()
         e = misc_data['smearing']
+        a *= e
 
         plotting.plot_model_contour(a, b, xi, alpha, k, save_path=save_path)
 
