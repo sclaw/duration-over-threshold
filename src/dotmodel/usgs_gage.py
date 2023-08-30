@@ -97,3 +97,9 @@ class Gage:
         misc_data = pd.read_sql_query('SELECT * FROM miscellaneous', self.connection)
 
         plotting.plot_timeseries(ts, misc_data, save_path)
+
+    def plot_exponential_durations(self, save_path):
+        clean_events = pd.read_sql_query('SELECT * FROM clean_events', self.connection)
+        misc_data = pd.read_sql_query('SELECT * FROM miscellaneous', self.connection)
+
+        plotting.exponential_check(clean_events, misc_data, save_path)

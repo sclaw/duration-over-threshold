@@ -158,3 +158,58 @@ def plot_timeseries(data, misc_data, save_path):
     plt.tight_layout()
     plt.savefig(save_path, dpi=300)
     plt.close(fig)
+
+def exponential_check(events, misc_data, save_path):
+    site_no = misc_data['site_no'].item()
+    name = misc_data['station_nm'].item()
+    da = round(float(misc_data['drain_area_va'].item()), 1)
+    title = f'{site_no} | {name} | {da} sqmi | QQ Plot for Exponential Distribution'
+
+    thresholds = events['threshold'].unique()
+
+    nrows = int(np.floor(len(thresholds) ** 0.5))
+    ncols = int(len(thresholds) / nrows)
+
+    fig, axs = plt.subplots(nrows=nrows, ncols=ncols, sharex=True, sharey=True)
+    plt.subplots_adjust(left=0.1, bottom=0.1, right=0.95, top=0.95, wspace=0.15, hspace=0.15)
+    fig.set_figheight(8.5)
+    fig.set_figwidth(11)
+    fig.text(0.5, 0.05, 'Theoretical Distribution Quantile', ha='center', va='center')
+    fig.text(0.05, 0.5, 'Experimental Quantile', ha='center', va='center', rotation='vertical')
+    fig.suptitle(title)
+
+    row_counter = 0
+    for ind, thresh in enumerate(thresholds):
+        col = ind - (row_counter * ncols)
+        thresh_events = events.query(f'threshold == {thresh}')
+        tmp_events = sorted(thresh_events['duration'].to_numpy())
+        sample_quantiles = [i / len(tmp_events) for i in range(len(tmp_events))]
+        sample_mean = sum(tmp_events) / len(tmp_events)
+        sample_var = np.sqrt(np.sum(np.square(np.array(tmp_events) - sample_mean)) / (len(tmp_events) - 1))
+
+        theoretical_quantiles = 1 - np.exp(-np.array(tmp_events) * (1 / sample_mean))
+
+        event_month = thresh_events['start'].astype('datetime64[ns]').dt.month
+        spring = ['darkorange' if m > 1 and m < 6 else 'slateblue' for m in event_month]
+        spring = [x for _, x in sorted(zip(thresh_events['duration'].to_numpy(), spring))]
+
+        mean_var_text = r'$\widehat{\mu} / \sqrt{S}$' + f' = {round(sample_mean / sample_var, 2)}'
+        all_text = f'{mean_var_text}'
+
+        axs[row_counter, col].set_facecolor("whitesmoke")
+
+        axs[row_counter, col].text(0, 1, all_text, c='k', ha='left', va='top', size=6.5)
+        axs[row_counter, col].text(1, 0, f'{int(thresh)}cfs', c='k', ha='right', va='bottom', size=15, alpha=0.8)
+
+        axs[row_counter, col].scatter(theoretical_quantiles, sample_quantiles, fc=spring, s=4, alpha=0.8)
+        axs[row_counter, col].plot([0, 1], [0, 1], ls='dashed', c='k', alpha=0.3)
+        
+        if col == (ncols - 1):
+            row_counter += 1
+    
+    legend_elements = [Line2D([0], [0], marker='o', color='w', label='Non-Spring Events', markerfacecolor='slateblue', markersize=5),
+                       Line2D([0], [0], marker='o', color='w', label='Spring Events', markerfacecolor='darkorange', markersize=5)]
+    axs[-1,-1].legend(handles=legend_elements, ncols=2, bbox_to_anchor=(1, -0.2))
+    
+    fig.savefig(save_path, dpi=300)
+    plt.close(fig)
