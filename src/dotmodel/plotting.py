@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 import matplotlib.ticker as mticker
+from matplotlib.lines import Line2D
 import numpy as np
 
 
@@ -118,6 +119,9 @@ def plot_model_contour(a, b, xi, alpha, k, resolution=3000, plot_live=False, sav
         y = np.interp(20 / rescale, contour[0][:, 0][::-1], contour[0][:, 1][::-1])
         ax.text(20 / rescale, y, level, va='center', ha='center', size=8, path_effects=[pe.withStroke(linewidth=4, foreground="whitesmoke")])
 
+    custom_line = Line2D([0], [0], color='slateblue', lw=2)
+    fig.legend(handles=[custom_line], labels=['Recurrence Interval (yrs)'], bbox_to_anchor=(0.97, 0.96))
+
     ax.set_ylabel('Flowrate (cfs)')
     ax.set_xlabel('Duration (days)')
     ax.set_xlim(10 / rescale, max_d / rescale)
@@ -133,3 +137,4 @@ def plot_model_contour(a, b, xi, alpha, k, resolution=3000, plot_live=False, sav
         plt.savefig(save_path, dpi=300)
 
     plt.close(fig)
+
