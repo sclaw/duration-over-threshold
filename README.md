@@ -53,7 +53,7 @@ potomac.plot_model_summary('01638500.png')
 
 ## Installation
 
-`muskingumcunge` can be installed using pip:
+`dotmodel` can be installed using pip:
 	
     $ python3 -m pip install dotmodel
 
