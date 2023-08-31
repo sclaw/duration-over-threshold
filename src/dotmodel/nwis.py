@@ -183,7 +183,6 @@ def generate_batch(state, out_path, min_record_length=None, water_new_year=None)
         combo = combo[combo['count_nu'] >= (365 * min_record_length)]
 
     combo.to_csv(out_path, index=False)
-    return combo
 
 
 def batch_download(output_dir, site_service_path):
