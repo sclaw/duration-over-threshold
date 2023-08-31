@@ -267,6 +267,10 @@ def download_gage_date(site_no, water_new_year=None, begin_date=None, end_date=N
     Args:
         site_no (str): USGS site number.
         water_new_year (str): Date of water NY.  Typically '10-01'
+        begin_date (str, optional): Optional hard code begin date.
+        Format should be 'MM-DD-YYYY'. Defaults to None.
+        end_date (atr, optional): Optional hard code end date.
+        Format should be 'MM-DD-YYYY'. Defaults to None.
     """
     # Query metadata
     print(f'Loading station metadata for {site_no}')
