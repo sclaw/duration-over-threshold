@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Functions related to downloading data from USGS NWIS REST API.
 
 Raises:

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from math import comb
 import numpy as np
 

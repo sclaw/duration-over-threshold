@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Tools for filling missing data from NWIS.
 """
 import pandas as pd

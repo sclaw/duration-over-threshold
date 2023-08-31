@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Code to read/write from SQL database and control model-fitting functions
 
 This class automates much of SQL database interaction and function calling

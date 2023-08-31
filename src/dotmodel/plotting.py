@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 import matplotlib.ticker as mticker
