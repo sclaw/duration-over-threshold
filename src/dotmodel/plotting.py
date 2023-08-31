@@ -19,6 +19,8 @@ def plot_marginal_fit(peaks, record_length, xi, alpha, k, save_path, ri_bounds=(
 
     recurrence_intervals = np.linspace(ri_bounds[0], ri_bounds[1], 1000)
     flow_space = xi + ((alpha * (1 - ((1 / recurrence_intervals) ** k))) / k)
+    recurrence_intervals = recurrence_intervals[flow_space > 0]
+    flow_space = flow_space[flow_space > 0]
 
     marginal.plot(recurrence_intervals, flow_space, alpha=0.95, zorder=12, c='royalblue', label='PDS Parametric Arrival Rate')
     marginal.scatter(plotting_positions, peaks, alpha=0.8, ec='lightcoral', fc='none', s=8, zorder=11, label='PDS Empirical Arrival Rate')
