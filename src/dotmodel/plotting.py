@@ -68,7 +68,7 @@ def plot_conditional_fit(events, misc_data, save_path):
     
     axs[1].set_xlabel('Event Threshold (cfs)')
     axs[1].set_ylabel('Event Duration (Minutes)')
-    axs[1].set_ylim(10, 1.3 * (10 ** 5))
+    axs[1].set_ylim(10, 1.3 * (10 ** 6))
     axs[1].set_yscale('log')
 
     secax = axs[1].secondary_yaxis('right', functions=(lambda x: x / (60 * 24), lambda x: x * (60 * 24)))
