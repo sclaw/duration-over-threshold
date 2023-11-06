@@ -115,7 +115,7 @@ class Gage:
         misc_data['smearing'] = power_fit['smearing']
         misc_data.to_sql('miscellaneous', self.connection, if_exists='replace', index=False)
 
-    def plot_model_summary(self, save_path):
+    def plot_model_summary(self, save_path, type='contour', units='imperial'):
         """Makes contour plot of flowrate, duration, and recurrence interval
 
         Args:
@@ -127,10 +127,13 @@ class Gage:
         xi = misc_data['xi'].item()
         alpha = misc_data['alpha'].item()
         k = misc_data['k'].item()
-        e = misc_data['smearing']
+        e = misc_data['smearing'].item()
         a *= e
 
-        plotting.plot_model_contour(a, b, xi, alpha, k, save_path=save_path)
+        if type == 'contour':
+            plotting.plot_model_contour(a, b, xi, alpha, k, save_path=save_path, units=units)
+        elif type == '3d':
+            plotting.plot_model_3d(a, b, xi, alpha, k, save_path=save_path, units=units)
 
     def plot_flow_frequency(self, save_path):
         """Makes plot of flowrate vs recurrence interval

@@ -4,6 +4,7 @@ import matplotlib.patheffects as pe
 import matplotlib.ticker as mticker
 from matplotlib.lines import Line2D
 import matplotlib.dates as mdates
+from matplotlib import cm
 import numpy as np
 
 
@@ -87,7 +88,7 @@ def plot_conditional_fit(events, misc_data, save_path):
     plt.savefig(save_path, dpi=150)
     plt.close(fig)
 
-def plot_model_contour(a, b, xi, alpha, k, resolution=3000, plot_live=False, save_path=None):
+def plot_model_contour(a, b, xi, alpha, k, resolution=3000, plot_live=False, save_path=None, units='imperial'):
     # set up interpolation grid
     max_q = ((1 - (0.002 ** k)) * (alpha / k)) + xi  # flow at 500-yr event
     max_q *= 1.05
@@ -112,6 +113,13 @@ def plot_model_contour(a, b, xi, alpha, k, resolution=3000, plot_live=False, sav
     rescale = (60 * 24)
     d = d / rescale
 
+    # rescale q
+    if units == 'imperial':
+        y_label = 'Flowrate (cfs)'
+    elif units == 'metric':
+        q /= 35.3147
+        y_label = 'Flowrate (cms)'
+
     fig, ax = plt.subplots()
     levels = {0.2: '0.2', 1: '1', 2:'2', 5:'5', 10:'10', 25:'25', 50:'50', 100:'100', 200:'200', 500:'500'}
     min_level = np.nanmin(full_lambda)
@@ -126,13 +134,61 @@ def plot_model_contour(a, b, xi, alpha, k, resolution=3000, plot_live=False, sav
     custom_line = Line2D([0], [0], color='slateblue', lw=2)
     fig.legend(handles=[custom_line], labels=['Recurrence Interval (yrs)'], bbox_to_anchor=(0.97, 0.96))
 
-    ax.set_ylabel('Flowrate (cfs)')
+    ax.set_ylabel(y_label)
     ax.set_xlabel('Duration (days)')
     ax.set_xlim(10 / rescale, max_d / rescale)
     ax.set_xscale('log')
     ax.set_facecolor("whitesmoke")
     ax.grid(c='k')
+    
     fig.tight_layout()
+    if plot_live:
+        plt.show()
+    if save_path:
+        plt.savefig(save_path, dpi=300)
+
+    plt.close(fig)
+
+def plot_model_3d(a, b, xi, alpha, k, resolution=3000, plot_live=False, save_path=None, units='imperial'):
+    # set up interpolation grid
+    max_q = ((1 - (0.002 ** k)) * (alpha / k)) + xi  # flow at 500-yr event
+    max_q *= 1.05
+    min_q = ((1 - (6 ** k)) * (alpha / k)) + xi  # flow at 0.25-yr event
+    min_q = max(min_q, 0)
+
+    q1 = ((1 - (1 ** k)) * (alpha / k)) + xi
+    max_d = np.log(0.002) * (-a * np.power(q1, b))  # 500 year event duration at 1-yr flowrate
+
+    q_space = np.linspace(min_q, max_q, resolution)
+    d_space = np.linspace(10, max_d, resolution)
+    q, d = np.meshgrid(q_space, d_space)
+
+    # calculate arrival rates
+    marginal_rates = (1 - ((q - xi) * (k / alpha))) ** (1 / k)
+    full_lambda = marginal_rates * np.exp(d / (-a * np.power(q, b)))
+    full_lambda[full_lambda == 0] = np.nan
+    full_lambda[full_lambda < 0.001] = np.nan
+    full_lambda = 1 / full_lambda
+
+    # rescale d
+    rescale = (60 * 24)
+    d = d / rescale
+
+    # rescale q
+    if units == 'imperial':
+        y_label = 'Flowrate (cfs)'
+    elif units == 'metric':
+        q /= 35.3147
+        y_label = 'Flowrate (cms)'
+
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+    ax.plot_surface(d, q, full_lambda, cmap=cm.plasma, linewidth=0, antialiased=False, zorder=1, rcount=70, ccount=70)
+
+    ax.set_ylabel(y_label)
+    ax.set_xlabel('Duration (days)')
+    ax.set_zlabel('Arrival Rate (years)')
+    ax.view_init(azim=225)
     
     fig.tight_layout()
     if plot_live:
