@@ -4,6 +4,8 @@
 
 # The Duration-Over-Threshold Model
 
+[![DOI](https://zenodo.org/badge/682614760.svg)](https://zenodo.org/doi/10.5281/zenodo.10095366)
+
 ## Overview
 `dotmodel` is the python library for applying the Duration-Over-Threshold model (Lawson et al., 2024).  The 
 Duration-Over-Threshold model is a hierarchical statistical model that characterizes the return period of a given 
